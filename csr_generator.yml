@@ -1,0 +1,39 @@
+---
+- name: Gerar CSR wildcard para hostweb.com.br
+  hosts: 10.180.0.94
+  gather_facts: no
+
+  vars:
+    domain: "hostweb.com.br"
+    certs_dir: "/certs"
+
+  tasks:
+    - name: Obter a data atual
+      set_fact:
+        current_date: "{{ lookup('pipe', 'date +%Y-%m') }}"
+
+    - name: Criar diretório do certificado com o nome do domínio e data atual
+      file:
+        path: "{{ certs_dir }}/{{ domain }}_{{ current_date }}"
+        state: directory
+        mode: '0755'
+
+    - name: Gerar chave privada RSA de 2048 bits
+      openssl_privatekey:
+        path: "{{ certs_dir }}/{{ domain }}_{{ current_date }}/{{ domain }}.key"
+        size: 2048
+        type: RSA
+
+    - name: Gerar CSR
+      openssl_csr:
+        path: "{{ certs_dir }}/{{ domain }}_{{ current_date }}/{{ domain }}.csr"
+        privatekey_path: "{{ certs_dir }}/{{ domain }}_{{ current_date }}/{{ domain }}.key"
+        common_name: "*.{{ domain }}"
+        key_usage:
+          - digitalSignature
+          - keyEncipherment
+          - dataEncipherment
+          - keyAgreement
+        extended_key_usage:
+          - serverAuth
+          - clientAuth
