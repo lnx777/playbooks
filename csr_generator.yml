@@ -5,7 +5,7 @@
 
   vars:
     domain: "hostweb.com.br"
-    certs_dir: "/certs"
+    certs_dir: "/certs/csr_private_key"
 
   tasks:
     - name: Obter a data atual
